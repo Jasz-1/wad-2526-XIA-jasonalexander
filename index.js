@@ -14,7 +14,7 @@ function substractQty(menuIndex, variantIndex) {
 
         const menuName = menus[menuIndex].name;
         const variantName = menus[menuIndex].variants[variantIndex].description;
-        alert(`${menuName}-${variantName} cannot be less than 0`);
+        alert(`${menuName} - ${variantName} cannot be less than 0.`);
     }
 
     const id = `qty-${menuIndex}-${variantIndex}`;
@@ -25,12 +25,12 @@ function substractQty(menuIndex, variantIndex) {
 function addQty(menuIndex, variantIndex) {
     cart[menuIndex][variantIndex] += 1;
 
-    if (cart[menuIndex][variantIndex] > menus[menuIndex].variants[variantIndex].stock) {
-        cart[menuIndex][variantIndex] = menus[menuIndex].variants[variantIndex].stock;
-
+    const stock = menus[menuIndex].variants[variantIndex].stock;
+    if (cart[menuIndex][variantIndex] > stock) {
+        cart[menuIndex][variantIndex] = stock;
         const menuName = menus[menuIndex].name;
         const variantName = menus[menuIndex].variants[variantIndex].description;
-        alert(`${menuName}-${variantName} cannot be more than stock(${menus[menuIndex].variants[variantIndex].stock})`);
+        alert(`${menuName} - ${variantName} cannot exceed ${stock}.`);
     }
 
     const id = `qty-${menuIndex}-${variantIndex}`;
@@ -47,30 +47,6 @@ function setupCart() {
         cart[i] = variantCart;
     }
 }
-
-function checkoutButton() {
-    let totalAmount = 0;
-
-    for (let i = 0; i < cart.length; i++) {
-        for (let j = 0; j < cart[i].length; j++) {
-            if (cart[i][j] > 0) {
-                totalAmount += cart[i][j] * menus[i].variants[j].price;
-            }
-
-        }
-    }
-
-    if (totalAmount > 0) {
-        alert("The total amount is " + totalAmount * 1000 + " IDR");
-    } else {
-        alert("Please select atleast 1 menu");
-    }
-
-    setupCart();
-    renderMenus();
-
-}
-
 
 function renderMenus() {
     let menuGrid = '';
@@ -113,4 +89,25 @@ function renderMenus() {
     }
 
     document.getElementById('menu-grid').innerHTML = menuGrid;
+}
+
+function checkout() {
+    let total = 0;
+    for (let i = 0; i < menus.length; i++) {
+        const m = menus[i];
+        for (let j = 0; j < m.variants.length; j++) {
+            const v = m.variants[j];
+            total += cart[i][j] * v.price;
+        }
+    }
+
+    if (total <= 0) {
+        alert('Select at least 1 menu variant first.');
+        return;
+    }
+    
+    const params = new URLSearchParams();
+
+    params.set('cart', JSON.stringify(cart));
+    window.location.href = `order-confirmation/index.html?${params.toString()}`;
 }
